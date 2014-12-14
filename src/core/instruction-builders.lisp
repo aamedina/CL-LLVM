@@ -102,12 +102,12 @@
 (defcfun* "LLVMBuildFNeg" value (builder builder) (v value) (name :string))
 (defcfun* "LLVMBuildNot" value (builder builder) (v value) (name :string))
 
-(defcfun* "LLVMBuildMalloc" value (builder builder) (ty type) (name :string))
+(defcfun* "LLVMBuildMalloc" value (builder builder) (ty llvm-type) (name :string))
 (defcfun* "LLVMBuildArrayMalloc" value
-  (builder builder) (ty type) (val value) (name :string))
-(defcfun* "LLVMBuildAlloca" value (builder builder) (ty type) (name :string))
+  (builder builder) (ty llvm-type) (val value) (name :string))
+(defcfun* "LLVMBuildAlloca" value (builder builder) (ty llvm-type) (name :string))
 (defcfun* "LLVMBuildArrayAlloca" value
-  (builder builder) (ty type) (val value) (name :string))
+  (builder builder) (ty llvm-type) (val value) (name :string))
 (defcfun* "LLVMBuildFree" value (builder builder) (pointer-val value))
 (defcfun* "LLVMBuildLoad" value
   (builder builder) (pointer-val value) (name :string))
@@ -132,48 +132,48 @@
   (b builder) (str :string) (name :string))
 
 (defcfun* "LLVMBuildTrunc" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildZExt" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildSExt" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildFPToUI" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildFPToSI" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildUIToFP" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildSIToFP" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildFPTrunc" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildFPExt" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun (build-pointer-to-int "LLVMBuildPtrToInt") value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun (build-int-to-pointer "LLVMBuildIntToPtr") value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildBitCast" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildZExtOrBitCast" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildSExtOrBitCast" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildTruncOrBitCast" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildPointerCast" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildIntCast" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildFPCast" value
-  (builder builder) (val value) (dest-ty type) (name :string))
+  (builder builder) (val value) (dest-ty llvm-type) (name :string))
 
 (defcfun* "LLVMBuildICmp" value
   (builder builder) (op int-predicate) (lhs value) (rhs value) (name :string))
 (defcfun* "LLVMBuildFCmp" value
   (builder builder) (op real-predicate) (lhs value) (rhs value) (name :string))
 
-(defcfun* "LLVMBuildPhi" value (builder builder) (ty type) (name :string))
+(defcfun* "LLVMBuildPhi" value (builder builder) (ty llvm-type) (name :string))
 (defcfun (%build-call "LLVMBuildCall") value
   (builder builder)
   (fn value) (args (carray value)) (num-args :unsigned-int)
@@ -183,7 +183,7 @@
 (defcfun* "LLVMBuildSelect" value
   (builder builder) (if value) (then value) (else value) (name :string))
 (defcfun* "LLVMBuildVAArg" value
-  (builder builder) (list value) (ty type) (name :string))
+  (builder builder) (list value) (ty llvm-type) (name :string))
 (defcfun* "LLVMBuildExtractElement" value
   (builder builder) (vec-val value) (index value) (name :string))
 (defcfun* "LLVMBuildInsertElement" value

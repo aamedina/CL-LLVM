@@ -1,8 +1,14 @@
 (in-package :llvm)
 
-(cc-flags "-D__STDC_LIMIT_MACROS"
-          "-D__STDC_CONSTANT_MACROS")
-(include "llvm-c/Core.h")
+(cc-flags "-DNDEBUG"
+          "-D_GNU_SOURCE"
+          "-D__STDC_CONSTANT_MACROS"
+          "-D__STDC_FORMAT_MACROS"
+          "-D__STDC_LIMIT_MACROS"
+          "-I/usr/local/Cellar/llvm/HEAD/include"
+          "-O3"
+          "-fno-common")
+(include "/usr/local/opt/llvm/include/llvm-c/Core.h")
 
 (cenum opcode
        ((:ret "LLVMRet"))
@@ -63,6 +69,7 @@
 
 (cenum type-kind
        ((:void "LLVMVoidTypeKind"))
+       ((:half "LLVMHalfTypeKind"))
        ((:float "LLVMFloatTypeKind"))
        ((:double "LLVMDoubleTypeKind"))
        ((:x86-fp80 "LLVMX86_FP80TypeKind"))
@@ -94,8 +101,7 @@
        ((:ghost "LLVMGhostLinkage"))
        ((:common "LLVMCommonLinkage"))
        ((:linker-private "LLVMLinkerPrivateLinkage"))
-       ((:linker-private-weak "LLVMLinkerPrivateWeakLinkage"))
-       ((:linker-private-weak-auto "LLVMLinkerPrivateWeakDefAutoLinkage")))
+       ((:linker-private-weak "LLVMLinkerPrivateWeakLinkage")))
 
 (cenum visibility
        ((:default "LLVMDefaultVisibility"))
@@ -106,6 +112,8 @@
        ((:c "LLVMCCallConv"))
        ((:fast "LLVMFastCallConv"))
        ((:cold "LLVMColdCallConv"))
+       ((:webkit "LLVMWebKitJSCallConv"))
+       ((:any-reg "LLVMAnyRegCallConv"))
        ((:x86-stdcall "LLVMX86StdcallCallConv"))
        ((:x86-fastcall "LLVMX86FastcallCallConv")))
 
@@ -142,3 +150,23 @@
 (cenum landing-pad-clause-type
        ((:catch "LLVMLandingPadCatch"))
        ((:filter "LLVMLandingPadFilter")))
+
+(cenum thread-local-mode
+       ((:global "LLVMNotThreadLocal"))
+       ((:generic-dynamic "LLVMGeneralDynamicTLSModel"))
+       ((:local-dynamic "LLVMLocalDynamicTLSModel"))
+       ((:init-exec "LLVMInitialExecTLSModel"))
+       ((:local-exec "LLVMLocalExecTLSModel")))
+
+(cenum atomic-ordering
+       ((:xchg "LLVMAtomicRMWBinOpXchg"))
+       ((:add "LLVMAtomicRMWBinOpAdd"))
+       ((:sub "LLVMAtomicRMWBinOpSub"))
+       ((:and "LLVMAtomicRMWBinOpAnd"))
+       ((:nand "LLVMAtomicRMWBinOpNand"))
+       ((:or "LLVMAtomicRMWBinOpOr"))
+       ((:xor "LLVMAtomicRMWBinOpXor"))
+       ((:max "LLVMAtomicRMWBinOpMax"))
+       ((:min "LLVMAtomicRMWBinOpMin"))
+       ((:unsigned-max "LLVMAtomicRMWBinOpUMax"))
+       ((:unsigned-min "LLVMAtomicRMWBinOpUMin")))

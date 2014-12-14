@@ -2,21 +2,24 @@
 
 (defmacro with-object ((var type &rest args) &body body)
   (let ((managers
-          ;; Each element is of the form (designator constructor destructor)
-          '((module make-module dispose-module)
-            (builder make-builder dispose-builder)
-            (memory-buffer make-memory-buffer dispose-memory-buffer)
-            (type-handle create-type-handle dispose-type-handle)
-            (context context-create dispose-context)
-            (pass-manager create-pass-manager dispose-pass-manager)
-            (function-pass-manager create-function-pass-manager-for-module dispose-pass-manager)
-            (target-data create-target-data dispose-target-data)
-            (generic-value-of-int create-generic-value-of-int dispose-generic-value)
-            (generic-value-of-pointer create-generic-value-of-pointer dispose-generic-value)
-            (generic-value-of-float create-generic-value-of-float dispose-generic-value)
-            (execution-engine make-execution-engine dispose-execution-engine)
-            (interpreter make-interpreter dispose-execution-engine)
-            (jit-compiler make-jit-compiler dispose-execution-engine))))
+         '((module make-module dispose-module)
+           (builder make-builder dispose-builder)
+           (memory-buffer make-memory-buffer dispose-memory-buffer)
+           (context context-create dispose-context)
+           (pass-manager create-pass-manager dispose-pass-manager)
+           (function-pass-manager create-function-pass-manager-for-module
+            dispose-pass-manager)
+           (target-data create-target-data dispose-target-data)
+           (generic-value-of-int create-generic-value-of-int
+            dispose-generic-value)
+           (generic-value-of-pointer create-generic-value-of-pointer
+            dispose-generic-value)
+           (generic-value-of-float create-generic-value-of-float
+            dispose-generic-value)
+           (execution-engine make-execution-engine dispose-execution-engine)
+           (interpreter make-interpreter dispose-execution-engine)
+           (jit-compiler make-jit-compiler dispose-execution-engine)
+           (mcjit-compiler make-mcjit-compiler dispose-mcjit-compiler))))
     `(let ((,var (,(second (assoc type managers :test 'string-equal)) ,@args)))
        (unwind-protect (progn ,@body)
          (,(third (assoc type managers :test 'string-equal)) ,var)))))
@@ -48,16 +51,23 @@
              (format stream "~a is a required parameter."
                      (name condition)))))
 
-;;; Core
-(defctype context :pointer) ; "LLVMContextRef")
-(defctype module :pointer) ; "LLVMModuleRef")
-(defctype type :pointer) ; "LLVMTypeRef")
-(defctype type-handle :pointer) ; "LLVMTypeHandleRef")
-(defctype value :pointer) ; "LLVMValueRef")
-(defctype basic-block :pointer) ; "LLVMBasicBlockRef")
-(defctype builder :pointer) ; "LLVMBuilderRef")
-(defctype memory-buffer :pointer) ; "LLVMMemoryBufferRef")
-(defctype pass-manager :pointer) ; "LLVMPassManagerRef")
+(define-foreign-type llvm-module ()
+  ()
+  (:actual-type :pointer)
+  (:simple-parser module))
+
+(defctype context :pointer)
+(defctype llvm-type :pointer)
+(defctype value :pointer)
+(defctype basic-block :pointer)
+(defctype builder :pointer)
+(defctype memory-buffer :pointer)
+(defctype pass-manager :pointer)
+(defctype pass-registry :pointer)
+(defctype use :pointer)
+(defctype diagnostic-info :pointer)
+
+(defcfun (global-pass-registry "LLVMGetGlobalPassRegistry") pass-registry)
 
 (defbitfield attribute
   (:z-ext #.(cl:ash 1 0))
@@ -81,16 +91,17 @@
   (:no-implicit-float #.(cl:ash 1 23))
   (:naked #.(cl:ash 1 24))
   (:inline-hint #.(cl:ash 1 25))
-  (:stack-alignment #.(cl:ash 1 26)))
+  (:stack-alignment #.(cl:ash 1 26))
+  (:returns-twice #.(cl:ash 1 29))
+  (:uw-table #.(cl:ash 1 30))
+  (:non-lazy-bind #.(cl:ash 1 31)))
 
-;;; Target
-(defctype target-data :pointer) ; "LLVMTargetDataRef")
-(defctype struct-layout :pointer) ; "LLVMStructLayoutRef")
-;;; ExecutionEngine
-(defctype generic-value :pointer) ; "LLVMGenericValueRef")
-(defctype execution-engine :pointer) ; "LLVMExecutionEngineRef")
-
-;;; numbers should be converted where necessary
+(defctype target-data :pointer)
+(defctype target-library-info :pointer)
+(defctype struct-layout :pointer)
+(defctype generic-value :pointer)
+(defctype execution-engine :pointer)
+(defctype memory-manager :pointer)
 
 (define-foreign-type real-double ()
   ()
@@ -102,8 +113,6 @@
 (defmethod translate-to-foreign (object (type real-double))
   (coerce object 'double-float))
 
-;;; need to convert arrays properly
-
 (define-foreign-type carray ()
   ((value-type :initarg :value-type :reader value-type)
    (capacity :initform nil :initarg :capacity :reader capacity))
@@ -113,8 +122,6 @@
   (make-instance 'carray :value-type value-type :capacity capacity))
 
 (defmethod translate-to-foreign (object (type carray))
-  ;; FIXME: should really make this null-terminated, but the actual null value
-  ;;        (0 or +null-pointer+) depends on the value-type.
   (foreign-alloc (value-type type)
                  :initial-contents object
                  :count (or (capacity type) (length object))))
@@ -137,22 +144,3 @@
   `(with-foreign-object (,pointer-var ',type ,length)
      ,@body
      (convert-from-foreign ,pointer-var `(carray ,',type ,,length))))
-
-;;; optimization-level should be a cenum, but only exists in C++.
-
-(let ((opt-level '((:none . 0)
-                   (:less . 1)
-                   (:default . 2)
-                   (:aggressive . 3))))
-  (define-foreign-type optimization-level ()
-    ()
-    (:actual-type :unsigned-int))
-
-  (define-parse-method optimization-level ()
-    (make-instance 'optimization-level))
-
-  (defmethod translate-to-foreign (object (type optimization-level))
-    (cdr (assoc object opt-level)))
-
-  (defmethod translate-from-foreign (object (type optimization-level))
-    (car (rassoc object opt-level))))

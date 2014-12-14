@@ -6,11 +6,11 @@
 ;;; operations on generic values
 
 (defcfun* "LLVMCreateGenericValueOfInt" generic-value
-  (ty type) (n :unsigned-long-long) (is-signed :boolean))
+  (ty llvm-type) (n :unsigned-long-long) (is-signed :boolean))
 
 (defcfun* "LLVMCreateGenericValueOfPointer" generic-value (p (:pointer :void)))
 
-(defcfun* "LLVMCreateGenericValueOfFloat" generic-value (ty type) (n :double))
+(defcfun* "LLVMCreateGenericValueOfFloat" generic-value (ty llvm-type) (n :double))
 
 (defcfun* "LLVMGenericValueIntWidth" :unsigned-int (gen-val generic-value))
 
@@ -19,7 +19,7 @@
 
 (defcfun* "LLVMGenericValueToPointer" (:pointer :void) (gen-val generic-value))
 
-(defcfun* "LLVMGenericValueToFloat" :double (ty type) (gen-val generic-value))
+(defcfun* "LLVMGenericValueToFloat" :double (ty llvm-type) (gen-val generic-value))
 
 (defcfun* "LLVMDisposeGenericValue" :void (gen-val generic-value))
 
@@ -50,9 +50,9 @@
 (defcfun* "LLVMCreateJITCompilerForModule" :boolean
   (out-jit (:pointer execution-engine))
   (m module)
-  (opt-level optimization-level)
+  (opt-level :unsigned-int)
   (out-error (:pointer :string)))
-(defun make-jit-compiler (module &optional (optimization-level :default))
+(defun make-jit-compiler (module &optional (optimization-level 0))
   (with-foreign-objects ((out-jit '(:pointer execution-engine))
                          (out-error '(:pointer :string)))
     (if (create-jit-compiler-for-module out-jit
@@ -112,3 +112,35 @@
 
 (defcfun (pointer-to-global "LLVMGetPointerToGlobal") (:pointer :void)
   (ee execution-engine) (global value))
+
+(defcstruct mcjit-compiler-options
+  (:opt-level :unsigned-int)
+  (:code-model code-model)
+  (:no-frame-pointer-elim? :boolean)
+  (:enable-fast-isel? :boolean)
+  (:memory-manager memory-manager))
+
+(defctype size :unsigned-int)
+
+(defcfun (link-in-mcjit "LLVMLinkInMCJIT") :void)
+(defcfun (init-mcjit-compiler-options "LLVMInitializeMCJITCompilerOptions")
+    :void
+  (options (:pointer (:struct mcjit-compiler-options)))
+  (size-of-options size))
+(defcfun (make-mcjit-compiler "LLVMCreateJITCompilerForModule") :boolean
+  (out-jit (:pointer execution-engine))
+  (m module)
+  (options (:pointer (:struct mcjit-compiler-options)))
+  (size-of-options size)
+  (out-error (:pointer :string)))
+(defcfun (make-memory-manager "LLVMCreateSimpleMCJITMemoryManager")
+    memory-manager
+  (opaque :pointer)
+  (allocate-code-section-callback :pointer)
+  (allocate-data-section-callback :pointer)
+  (finalize-memory-callback :pointer)
+  (destroy-callback :pointer))
+(defcfun (dispose-memory-manager "LLVMDisposeMCJITMemoryManager") :void
+  (manager memory-manager))
+
+

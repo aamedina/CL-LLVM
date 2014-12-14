@@ -1,6 +1,6 @@
 (in-package :llvm)
 
-(defcfun* "LLVMTypeOf" type (val value))
+(defcfun* "LLVMTypeOf" llvm-type (val value))
 (defcfun (value-name "LLVMGetValueName") :string (val value))
 (defcfun* "LLVMSetValueName" :void (val value) (name :string))
 (defun (setf value-name) (name val)
@@ -15,22 +15,21 @@
 (defcfun* "LLVMSetOperand" value (user value) (index :unsigned-int) (val value))
 (defcfun* "LLVMGetNumOperands" value (val value))
 
-(defcfun* "LLVMConstNull" value (ty type))
-(defcfun* "LLVMConstAllOnes" value (ty type))
-(defcfun (undef "LLVMGetUndef") value (ty type))
+(defcfun* "LLVMConstNull" value (ty llvm-type))
+(defcfun* "LLVMConstAllOnes" value (ty llvm-type))
+(defcfun (undef "LLVMGetUndef") value (ty llvm-type))
 (defcfun (constantp "LLVMIsConstant") :boolean (val value))
 (defcfun (nullp "LLVMIsNull") :boolean (val value))
 (defcfun (undefp "LLVMIsUndef") :boolean (val value))
-(defcfun* "LLVMConstPointerNull" value (ty type))
+(defcfun* "LLVMConstPointerNull" value (ty llvm-type))
 
 (defcfun (%const-int "LLVMConstInt") value
-  (int-ty type) (n :unsigned-long-long) (sign-extend :boolean))
+  (int-ty llvm-type) (n :unsigned-long-long) (sign-extend :boolean))
 (defcfun* "LLVMConstIntOfString" value
-  (int-ty type) (text :string) (radix :uint8))
-;; NOTE: This is only available in SVN as of revision 119989, and releases after
-;;       1.8.
+  (int-ty llvm-type) (text :string) (radix :uint8))
+
 (defcfun* "LLVMConstIntOfArbitraryPrecision" value
-  (int-ty type) (num-words :unsigned-int) (words (carray :uint64)))
+  (int-ty llvm-type) (num-words :unsigned-int) (words (carray :uint64)))
 (defun const-int (int-ty value &optional radix)
   (if (typep value 'string)
       (const-int-of-string int-ty value radix)
@@ -45,8 +44,8 @@
                              while (< 0 num)
                              collect (logand num bitmask))))
               (const-int-of-arbitrary-precision int-ty length words))))))
-(defcfun (%const-real "LLVMConstReal") value (real-ty type) (n real-double))
-(defcfun* "LLVMConstRealOfString" value (real-ty type) (text :string))
+(defcfun (%const-real "LLVMConstReal") value (real-ty llvm-type) (n real-double))
+(defcfun* "LLVMConstRealOfString" value (real-ty llvm-type) (text :string))
 (defun const-real (real-ty value)
   (if (typep value 'string)
       (const-real-of-string real-ty value)
@@ -70,7 +69,7 @@
 (defun const-struct (constant-vals packed &key (context (global-context)))
   (const-struct-in-context context constant-vals (length constant-vals) packed))
 (defcfun (%const-array "LLVMConstArray") value
-  (element-ty type) (constant-vals (carray value)) (length :unsigned-int))
+  (element-ty llvm-type) (constant-vals (carray value)) (length :unsigned-int))
 (defun const-array (element-ty constant-vals)
   (%const-array element-ty constant-vals (length constant-vals)))
 (defcfun (%const-vector "LLVMConstVector") value
@@ -79,8 +78,8 @@
   (%const-vector scalar-constant-vals (length scalar-constant-vals)))
 
 (defcfun (const-opcode "LLVMGetConstOpcode") opcode (constant-val value))
-(defcfun* "LLVMAlignOf" value (ty type))
-(defcfun* "LLVMSizeOf" value (ty type))
+(defcfun* "LLVMAlignOf" value (ty llvm-type))
+(defcfun* "LLVMSizeOf" value (ty llvm-type))
 (defcfun* "LLVMConstNeg" value (constant-val value))
 (defcfun* "LLVMConstFNeg" value (constant-val value))
 (defcfun* "LLVMConstNot" value (constant-val value))
@@ -119,27 +118,27 @@
 (defun const-in-bounds-gep (constant-val constant-indices)
   (%const-in-bounds-gep constant-val
                         constant-indices (length constant-indices)))
-(defcfun* "LLVMConstTrunc" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstSExt" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstZExt" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstFPTrunc" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstFPExt" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstUIToFP" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstSIToFP" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstFPToUI" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstFPToSI" value (constant-val value) (to-type type))
+(defcfun* "LLVMConstTrunc" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstSExt" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstZExt" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstFPTrunc" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstFPExt" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstUIToFP" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstSIToFP" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstFPToUI" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstFPToSI" value (constant-val value) (to-type llvm-type))
 (defcfun (const-pointer-to-int "LLVMConstPtrToInt") value
-  (constant-val value) (to-type type))
+  (constant-val value) (to-type llvm-type))
 (defcfun (const-int-to-pointer "LLVMConstIntToPtr") value
-  (constant-val value) (to-type type))
-(defcfun* "LLVMConstBitCast" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstZExtOrBitCast" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstSExtOrBitCast" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstTruncOrBitCast" value (constant-val value) (to-type type))
-(defcfun* "LLVMConstPointerCast" value (constant-val value) (to-type type))
+  (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstBitCast" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstZExtOrBitCast" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstSExtOrBitCast" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstTruncOrBitCast" value (constant-val value) (to-type llvm-type))
+(defcfun* "LLVMConstPointerCast" value (constant-val value) (to-type llvm-type))
 (defcfun* "LLVMConstIntCast" value
-  (constant-val value) (to-type type) (is-signed :boolean))
-(defcfun* "LLVMConstFPCast" value (constant-val value) (to-type type))
+  (constant-val value) (to-type llvm-type) (is-signed :boolean))
+(defcfun* "LLVMConstFPCast" value (constant-val value) (to-type llvm-type))
 (defcfun* "LLVMConstSelect" value
   (constant-condition value) (constant-if-true value) (constant-if-false value))
 (defcfun* "LLVMConstExtractElement" value
@@ -160,7 +159,7 @@
   (%const-insert-value agg-constant element-value-constant
                        idx-list (length idx-list)))
 (defcfun* "LLVMConstInlineAsm" value
-  (ty type) (asm-string :string) (constraints :string)
+  (ty llvm-type) (asm-string :string) (constraints :string)
   (has-side-effects :boolean))
 (defcfun* "LLVMBlockAddress" value (f value) (bb basic-block))
 (defcfun (global-parent "LLVMGetGlobalParent") module (global value))
@@ -186,7 +185,7 @@
   (set-alignment global bytes)
   bytes)
 
-(defcfun* "LLVMAddGlobal" value (m module) (ty type) (name :string))
+(defcfun* "LLVMAddGlobal" value (m module) (ty llvm-type) (name :string))
 (defcfun (named-global "LLVMGetNamedGlobal") value (m module) (name :string))
 (defcfun (first-global "LLVMGetFirstGlobal") value (m module))
 (defcfun (last-global "LLVMGetLastGlobal") value (m module))
@@ -212,9 +211,9 @@
   is-constant)
 
 (defcfun* "LLVMAddAlias" value
-  (m module) (ty type) (aliasee value) (name :string))
+  (m module) (ty llvm-type) (aliasee value) (name :string))
 
-(defcfun* "LLVMAddFunction" value (m module) (name :string) (function-ty type))
+(defcfun* "LLVMAddFunction" value (m module) (name :string) (function-ty llvm-type))
 (defcfun (named-function "LLVMGetNamedFunction") value
   (m module) (name :string))
 (defcfun (first-function "LLVMGetFirstFunction") value (m module))
@@ -243,7 +242,7 @@
   (get-function-attr function))
 (defcfun* "LLVMRemoveFunctionAttr" :void (fn value) (pa attribute))
 (defun remove-function-attributes (fn &rest attributes)
-  (remove-function-attribute fn attributes))
+  (remove-function-attr fn attributes))
 
 (defcfun* "LLVMCountParams" :unsigned-int (fn value))
 (defcfun* "LLVMGetParams" :void (fn value) (params (:pointer value)))

@@ -3,9 +3,6 @@
 
 (in-package :llvm-system)
 
-;;; NOTE: before this will work, you need to have LLVM installed (and don't
-;;;       forget to build the shared lib with --enable-shared)
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (mapc #+quicklisp #'ql:quickload #-quicklisp #'asdf:load-system
         '(cffi-grovel)))
@@ -17,7 +14,7 @@
                      hopefully intuitive) to use them in Common Lisp."
   :license "MIT"
   :author "Greg Pfeil <greg@technomadic.org>"
-  :depends-on (cffi cffi-grovel trivial-features)
+  :depends-on (cffi cffi-grovel cffi-libffi trivial-features)
   :pathname "src/"
   :components
   ((:file "package")
@@ -29,9 +26,13 @@
                          (:file "modules"
                                 :depends-on ("grovel" "error-handling"))
                          (:file "types"
-                                :depends-on ("grovel" "modules" "error-handling"))
+                                :depends-on ("grovel"
+                                             "modules"
+                                             "error-handling"))
                          (:file "values"
-                                :depends-on ("grovel" "modules" "error-handling"))
+                                :depends-on ("grovel"
+                                             "modules"
+                                             "error-handling"))
                          (:file "instruction-builders"
                                 :depends-on ("grovel" "error-handling"))
                          (:file "memory-buffers"
@@ -44,22 +45,9 @@
                          (:file "analysis" :depends-on ("analysis-grovel"))
                          (:file "bit-reader")
                          (:file "bit-writer")
-                         (:file "execution-engine")
+                         (cffi-grovel:grovel-file "target-machine-grovel")
+                         (:file "execution-engine"
+                                :depends-on ("target-machine-grovel"))
                          (cffi-grovel:grovel-file "target-grovel")
                          (:file "target" :depends-on ("target-grovel"))
                          (:file "scalar-transforms")))))
-
-;;; NOTE: In order to load and run the Kaleidoscope tutorial, you first need to
-;;;       run `./build-library.sh` in the tutorial subdirectory.
-
-(defsystem kaleidoscope
-    :description "A translation of the language created in the LLVM tutorial."
-    :depends-on (llvm)
-    :pathname "tutorial/"
-    :components ((:file "cffi")
-                 (:file "chapter2")
-                 (:file "chapter3")
-                 (:file "chapter4")
-                 (:file "chapter5")
-                 (:file "chapter6")
-                 (:file "chapter7")))

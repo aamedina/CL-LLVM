@@ -61,36 +61,36 @@
 
 (defcfun* "LLVMPointerSize" :unsigned-int (target-data target-data))
 
-(defcfun (int-pointer-type "LLVMIntPtrType") type (target-data target-data))
+(defcfun (int-pointer-type "LLVMIntPtrType") llvm-type (target-data target-data))
 
 (defcfun* "LLVMSizeOfTypeInBits" :unsigned-long-long
-  (target-data target-data) (type type))
+  (target-data target-data) (type llvm-type))
 
 (defcfun (storage-size-of-type "LLVMStoreSizeOfType") :unsigned-long-long
-  (target-data target-data) (type type))
+  (target-data target-data) (type llvm-type))
 
 (defcfun* "LLVMABISizeOfType" :unsigned-long-long
-  (target-data target-data) (type type))
+  (target-data target-data) (type llvm-type))
 
 (defcfun* "LLVMABIAlignmentOfType" :unsigned-int
-  (target-data target-data) (type type))
+  (target-data target-data) (type llvm-type))
 
 (defcfun* "LLVMCallFrameAlignmentOfType" :unsigned-int
-  (target-data target-data) (type type))
+  (target-data target-data) (type llvm-type))
 
 (defcfun* "LLVMPreferredAlignmentOfType" :unsigned-int
-  (target-data target-data) (type type))
+  (target-data target-data) (type llvm-type))
 
 (defcfun* "LLVMPreferredAlignmentOfGlobal" :unsigned-int
   (target-data target-data) (global-var value))
 
 (defcfun* "LLVMElementAtOffset" :unsigned-int
-  (target-data target-data) (struct-ty type) (offset :unsigned-long-long))
+  (target-data target-data) (struct-ty llvm-type) (offset :unsigned-long-long))
 
 (defcfun* "LLVMOffsetOfElement" :unsigned-long-long
-  (target-data target-data) (struct-ty type) (element :unsigned-int))
+  (target-data target-data) (struct-ty llvm-type) (element :unsigned-int))
 
 (defcfun* "LLVMInvalidateStructLayout" :void
-  (target-data target-data) (struct-ty type))
+  (target-data target-data) (struct-ty llvm-type))
 
 (defcfun* "LLVMDisposeTargetData" :void (target-data target-data))

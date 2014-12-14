@@ -23,11 +23,19 @@
   (set-target m triple)
   triple)
 
-(defcfun* "LLVMAddTypeName" :int (m module) (name :string) (ty type))
+(defcfun* "LLVMAddTypeName" :int (m module) (name :string) (ty llvm-type))
 (defcfun* "LLVMDeleteTypeName" :void (m module) (name :string))
-(defcfun* "LLVMGetTypeByName" type (m module) (name :string))
+(defcfun* "LLVMGetTypeByName" llvm-type (m module) (name :string))
 
 (defcfun (%dump-module "LLVMDumpModule") :void (m module))
 (defun dump-module (m)
   (finish-output *error-output*)
   (%dump-module m))
+
+(defcfun (print-module "LLVMPrintModuleToString") :string
+  (m module))
+
+(defcfun (spit-module "LLVMPrintModuleToFile") :boolean
+  (m module))
+
+
