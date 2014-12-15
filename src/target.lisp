@@ -1,12 +1,15 @@
 (in-package :llvm)
 
-;;; NOTE: Add any new LLVM targets to the following list.
 (eval-when (:compile-toplevel :load-toplevel)
   (defvar *targets* '("MBlaze" "CppBackend" "MSIL" "CBackend" "Blackfin"
                       "SystemZ" "MSP430" "XCore" "PIC16" "CellSPU" "Mips" "ARM"
                       "Alpha" "PowerPC" "Sparc" "X86"))
   (defvar *target-info-functions* nil)
-  (defvar *target-functions* nil))
+  (defvar *target-mc-functions* nil)
+  (defvar *target-functions* nil)
+  (defvar *asm-printer-functions* nil)
+  (defvar *asm-parser-functions* nil)
+  (defvar *disassembler-functions* nil))
 
 (defmacro declare-targets ()
   `(progn ,@(mapcan (lambda (target)
@@ -18,7 +21,26 @@
                         (push (defcfun* ,(format nil "LLVMInitialize~aTarget"
                                                  target)
                                   :void)
-                              *target-functions*)))
+                              *target-functions*)
+                        (push (defcfun* ,(format nil "LLVMInitialize~aTargetMC"
+                                                 target)
+                                  :void)
+                              *target-mc-functions*)
+                        (push (defcfun* ,(format nil
+                                                 "LLVMInitialize~aAsmPrinter"
+                                                 target)
+                                  :void)
+                              *asm-printer-functions*)
+                        (push (defcfun* ,(format nil
+                                                 "LLVMInitialize~aAsmParser"
+                                                 target)
+                                  :void)
+                              *asm-parser-functions*)
+                        (push (defcfun* ,(format nil
+                                                 "LLVMInitialize~aDisassembler"
+                                                 target)
+                                  :void)
+                              *disassembler-functions*)))
                     *targets*)))
 
 (declare-targets)
@@ -41,7 +63,14 @@
   #+(or sparc sparc64)
   (progn (initialize-sparc-target-info) (initialize-sparc-target) t)
   #+(or x86 x86-64)
-  (progn (initialize-x86-target-info) (initialize-x86-target) t)
+  (progn
+    (initialize-x86-target-info)
+    (initialize-x86-target)
+    (initialize-x86-target-m-c)
+    (initialize-x86-asm-printer)
+    (initialize-x86-asm-parser)
+    (initialize-x86-disassembler)
+    t)
   #-(or mips alpha ppc ppc64 sparc sparc64 x86 x86-64) nil)
 
 (defcfun* "LLVMCreateTargetData" target-data (string-rep :string))

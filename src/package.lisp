@@ -28,8 +28,6 @@
            :array-type :pointer-type :vector-type
            :element-type :array-length :pointer-address-space :vector-size
            :void-type :label-type :opaque-type
-           :type-handle :refine-type :resolve-type-handle
-           :dispose-type-handle
            ;; values
            :type-of :value-name :dump-value
            :get-operand :set-operand :get-num-operands

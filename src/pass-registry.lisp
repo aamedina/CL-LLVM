@@ -33,8 +33,13 @@
 (defcfun* "LLVMInitializeTarget" :void
   (r pass-registry))
 
+(defcfun* "LLVMEnablePrettyStackTrace" :void)
+
 (defun initialize-system ()
+  (initialize-native-target)
+  (enable-pretty-stack-trace)
   (let ((global-registry (global-pass-registry)))
+    (link-in-mcjit)
     (initialize-core global-registry)
     (initialize-transform-utils global-registry)
     (initialize-scalar-opts global-registry)
