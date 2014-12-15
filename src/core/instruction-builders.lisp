@@ -38,15 +38,37 @@
   (builder builder) (if value) (then basic-block) (else basic-block))
 (defcfun* "LLVMBuildSwitch" value
   (builder builder) (v value) (else basic-block) (num-cases :unsigned-int))
+(defcfun* "LLVMBuildIndirectBr" value
+  (builder builder) (addr value) (num-dests :unsigned-int))
 (defcfun (%build-invoke "LLVMBuildInvoke") value
   (builder builder) (fn value) (args (carray value)) (num-args :unsigned-int)
   (then basic-block) (catch basic-block) (name :string))
 (defun build-invoke (builder fn args then catch name)
   (%build-invoke builder fn args (length args) then catch name))
-(defcfun* "LLVMBuildUnwind" value (builder builder))
+(defcfun* "LLVMBuildLandingPad" value
+  (builder builder)
+  (ty llvm-type)
+  (pers-fn value)
+  (num-clauses :unsigned-int)
+  (name :string))
+(defcfun* "LLVMBuildResume" value
+  (builder builder)
+  (exn value))
 (defcfun* "LLVMBuildUnreachable" value (builder builder))
 
-(defcfun* "LLVMAddCase" :void (switch value) (on-val value) (dest basic-block))
+(defcfun* "LLVMAddCase" :void
+  (switch value)
+  (on-val value)
+  (dest basic-block))
+(defcfun* "LLVMAddDestination" :void
+  (indirect-br value)
+  (dest basic-block))
+(defcfun* "LLVMAddClause" :void
+  (landing-pad value)
+  (clause-val basic-block))
+(defcfun* "LLVMSetCleanup" :void
+  (landing-pad value)
+  (val basic-block))
 
 (defcfun* "LLVMBuildAdd" value
   (builder builder) (lhs value) (rhs value) (name :string))
@@ -98,7 +120,15 @@
   (builder builder) (lhs value) (rhs value) (name :string))
 (defcfun* "LLVMBuildXor" value
   (builder builder) (lhs value) (rhs value) (name :string))
+(defcfun* "LLVMBuildBinOp" value
+  (builder builder)
+  (op opcode)
+  (lhs value)
+  (rhs value)
+  (name :string))
 (defcfun* "LLVMBuildNeg" value (builder builder) (v value) (name :string))
+(defcfun* "LLVMBuildNSWNeg" value (builder builder) (v value) (name :string))
+(defcfun* "LLVMBuildNUWNeg" value (builder builder) (v value) (name :string))
 (defcfun* "LLVMBuildFNeg" value (builder builder) (v value) (name :string))
 (defcfun* "LLVMBuildNot" value (builder builder) (v value) (name :string))
 
@@ -130,6 +160,11 @@
   (b builder) (str :string) (name :string))
 (defcfun (build-global-string-pointer "LLVMBuildGlobalStringPtr") value
   (b builder) (str :string) (name :string))
+(defcfun (volatile "LLVMGetVolatile") :boolean
+  (memory-access-inst value))
+(defcfun (set-volatile "LLVMSetVolatile") :void
+  (memory-access-inst value)
+  (is-volatile? :boolean))
 
 (defcfun* "LLVMBuildTrunc" value
   (builder builder) (val value) (dest-ty llvm-type) (name :string))
@@ -167,6 +202,12 @@
   (builder builder) (val value) (dest-ty llvm-type) (name :string))
 (defcfun* "LLVMBuildFPCast" value
   (builder builder) (val value) (dest-ty llvm-type) (name :string))
+(defcfun* "LLVMBuildCast" value
+  (builder builder)
+  (op opcode)
+  (val value)
+  (dest-ty llvm-type)
+  (name :string))
 
 (defcfun* "LLVMBuildICmp" value
   (builder builder) (op int-predicate) (lhs value) (rhs value) (name :string))
@@ -205,3 +246,16 @@
   (builder builder) (val value) (name :string))
 (defcfun (build-pointer-diff "LLVMBuildPtrDiff") value
   (builder builder) (lhs value) (rhs value) (name :string))
+(defcfun (build-fence "LLVMBuildFence") value
+  (builder builder)
+  (ordering atomic-ordering)
+  (singled-threaded-p :boolean)
+  (name :string))
+(defcfun (build-atomic "LLVMBuildAtomicRMW") value
+  (builder builder)
+  (op atomic-opcode)
+  (ptr value)
+  (val value)
+  (ordering atomic-ordering)
+  (singled-threaded-p :boolean))
+

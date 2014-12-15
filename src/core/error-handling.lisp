@@ -51,13 +51,9 @@
              (format stream "~a is a required parameter."
                      (name condition)))))
 
-(define-foreign-type llvm-module ()
-  ()
-  (:actual-type :pointer)
-  (:simple-parser module))
-
 (defctype context :pointer)
 (defctype llvm-type :pointer)
+(defctype module :pointer)
 (defctype value :pointer)
 (defctype basic-block :pointer)
 (defctype builder :pointer)

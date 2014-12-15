@@ -48,3 +48,17 @@
 (defcfun* "LLVMAddConstantPropagationPass" :void (pm pass-manager))
 
 (defcfun* "LLVMAddDemoteMemoryToRegisterPass" :void (pm pass-manager))
+
+(defcfun* "LLVMAddVerifierPass" :void (pm pass-manager))
+
+(defcfun* "LLVMAddCorrelatedValuePropagationPass" :void (pm pass-manager))
+
+(defcfun* "LLVMAddEarlyCSEPass" :void (pm pass-manager))
+
+(defcfun* "LLVMAddLowerExpectIntrinsicPass" :void (pm pass-manager))
+
+(defcfun* "LLVMAddTypeBasedAliasAnalysisPass" :void (pm pass-manager))
+
+(defcfun* "LLVMAddScopedNoAliasAAPass" :void (pm pass-manager))
+
+(defcfun* "LLVMAddBasicAliasAnalysisPass" :void (pm pass-manager))

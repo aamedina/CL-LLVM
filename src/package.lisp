@@ -7,6 +7,7 @@
            :module
            :with-module
            :make-module
+           :clone-module
            :dispose-module
            :data-layout
            :target
@@ -82,13 +83,25 @@
            :builder :with-builder :make-builder :dispose-builder
            :position-builder :position-builder-before :position-builder-at-end
            :insertion-block :clear-insertion-position :insert-into-builder
-           :build-ret :build-br :build-cond-br :build-switch :build-invoke
-           :build-unwind :build-unreachable
+           :build-ret :build-br :build-cond-br :build-switch
+           :build-indirect-br
+           :build-invoke
+           :build-landing-pad
+           :build-cast
+           :set-volatile
+           :volatile
+           :build-fence
+           :build-atomic-rmw
+           :build-resume :build-unreachable
            :add-case
+           :add-destination
+           :add-clause
+           :set-cleanup
            :build-add :build-nsw-add :build-nuw-add :build-f-add
            :build-sub :build-nsw-sub :build-nuw-sub :build-f-sub
            :build-mul :build-nsw-mul :build-nuw-mul :build-f-mul
            :build-u-div :build-s-div :build-exact-s-div :build-f-div
+           :build-bin-op
            :build-u-rem :build-s-rem :build-f-rem
            :build-and :build-or :build-xor :build-neg
            :build-f-neg :build-not
@@ -181,6 +194,14 @@
            :execution-engine-target-data
            :add-global-mapping
            :pointer-to-global
+           :link-in-mcjit
+           :init-mcjit-compiler-options
+           :make-mcjit-compiler
+           :make-memory-manager
+           :dispose-memory-manager
+           ;; pass manager builder
+           :pass-manager-builder-create
+           :pass-manager-builder-dispose
            ;; scalar transforms
            :add-aggressive-dce-pass
            :add-cfg-simplification-pass

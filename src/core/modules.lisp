@@ -38,4 +38,4 @@
 (defcfun (spit-module "LLVMPrintModuleToFile") :boolean
   (m module))
 
-
+(defcfun (clone-module "LLVMCloneModule") module (m module))

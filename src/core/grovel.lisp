@@ -159,6 +159,15 @@
        ((:local-exec "LLVMLocalExecTLSModel")))
 
 (cenum atomic-ordering
+       ((:none "LLVMAtomicOrderingNotAtomic"))
+       ((:unordered "LLVMAtomicOrderingUnordered"))
+       ((:monotonic "LLVMAtomicOrderingMonotonic"))
+       ((:acquire "LLVMAtomicOrderingAcquire"))
+       ((:release "LLVMAtomicOrderingRelease"))
+       ((:acquire-release "LLVMAtomicOrderingAcquireRelease"))
+       ((:sequentially-consistent "LLVMAtomicOrderingSequentiallyConsistent")))
+
+(cenum atomic-opcode
        ((:xchg "LLVMAtomicRMWBinOpXchg"))
        ((:add "LLVMAtomicRMWBinOpAdd"))
        ((:sub "LLVMAtomicRMWBinOpSub"))
