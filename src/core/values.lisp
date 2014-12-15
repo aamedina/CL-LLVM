@@ -10,10 +10,20 @@
 (defun dump-value (val)
   (finish-output *error-output*)
   (%dump-value val))
+(defcfun (print-value "LLVMPrintValueToString") :void (val value))
+(defcfun* "LLVMReplaceAllUsesWith" :void
+  (oldval value)
+  (newval value))
 
 (defcfun* "LLVMGetOperand" value (val value) (index :unsigned-int))
+(defcfun* "LLVMGetOperandUse" value (val value) (index :unsigned-int))
 (defcfun* "LLVMSetOperand" value (user value) (index :unsigned-int) (val value))
 (defcfun* "LLVMGetNumOperands" value (val value))
+
+(defcfun (first-use "LLVMGetFirstUse") use (val value))
+(defcfun (next-use "LLVMGetNextUse") use (u use))
+(defcfun (user "LLVMGetUser") value (u use))
+(defcfun (used-value "LLVMGetUser") value (u use))
 
 (defcfun* "LLVMConstNull" value (ty llvm-type))
 (defcfun* "LLVMConstAllOnes" value (ty llvm-type))
@@ -60,18 +70,28 @@
   (str :string) (length :unsigned-int)
   (dont-null-terminate :boolean))
 ;;; FIXME: is it right to hardcode dont-null-terminate here?
-(defun const-string (str dont-null-terminate &key (context (global-context)))
+(defun const-string (str
+                     &optional dont-null-terminate
+                     &key (context (global-context)))
   (const-string-in-context context str (length str) dont-null-terminate))
 (defcfun* "LLVMConstStructInContext" value
   (c context)
-  (constant-vals (carray value)) (count :unsigned-int)
+  (constant-vals (carray value))
+  (count :unsigned-int)
   (packed :boolean))
+(defcfun* "LLVMConstNamedStruct" value
+  (struct-ty llvm-type)
+  (constant-vals (carray value))
+  (count :unsigned-int))
 (defun const-struct (constant-vals packed &key (context (global-context)))
   (const-struct-in-context context constant-vals (length constant-vals) packed))
 (defcfun (%const-array "LLVMConstArray") value
   (element-ty llvm-type) (constant-vals (carray value)) (length :unsigned-int))
 (defun const-array (element-ty constant-vals)
   (%const-array element-ty constant-vals (length constant-vals)))
+(defcfun (constant-element "LLVMGetElementAsConstant") value
+  (c value)
+  (idx :unsigned-int))
 (defcfun (%const-vector "LLVMConstVector") value
   (scalar-constant-vals (carray value)) (size :unsigned-int))
 (defun const-vector (scalar-constant-vals)
@@ -81,14 +101,21 @@
 (defcfun* "LLVMAlignOf" value (ty llvm-type))
 (defcfun* "LLVMSizeOf" value (ty llvm-type))
 (defcfun* "LLVMConstNeg" value (constant-val value))
+(defcfun* "LLVMConstNSWNeg" value (constant-val value))
+(defcfun* "LLVMConstNUWNeg" value (constant-val value))
 (defcfun* "LLVMConstFNeg" value (constant-val value))
 (defcfun* "LLVMConstNot" value (constant-val value))
 (defcfun* "LLVMConstAdd" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstNSWAdd" value (lhs-constant value) (rhs-constant value))
+(defcfun* "LLVMConstNUWAdd" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstFAdd" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstSub" value (lhs-constant value) (rhs-constant value))
+(defcfun* "LLVMConstNSWSub" value (lhs-constant value) (rhs-constant value))
+(defcfun* "LLVMConstNUWSub" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstFSub" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstMul" value (lhs-constant value) (rhs-constant value))
+(defcfun* "LLVMConstNSWMul" value (lhs-constant value) (rhs-constant value))
+(defcfun* "LLVMConstNUWMul" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstFMul" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstUDiv" value (lhs-constant value) (rhs-constant value))
 (defcfun* "LLVMConstSDiv" value (lhs-constant value) (rhs-constant value))
@@ -270,6 +297,8 @@
 (defcfun (value-is-basic-block-p "LLVMValueIsBasicBlock") :boolean (val value))
 (defcfun* "LLVMValueAsBasicBlock" basic-block (val value))
 (defcfun (basic-block-parent "LLVMGetBasicBlockParent") value (bb basic-block))
+(defcfun (basic-block-terminator "LLVMGetBasicBlockTerminator") value
+  (bb basic-block))
 (defcfun* "LLVMCountBasicBlocks" :unsigned-int (fn value))
 (defcfun* "LLVMGetBasicBlocks" :void
   (fn value) (basic-blocks (:pointer basic-block)))
@@ -294,6 +323,7 @@
   (insert-basic-block-in-context context insert-block name))
 
 (defcfun* "LLVMDeleteBasicBlock" :void (bb basic-block))
+(defcfun* "LLVMRemoveBasicBlockFromParent" :void (bb basic-block))
 (defcfun* "LLVMMoveBasicBlockBefore" :void
   (block basic-block) (move-pos basic-block))
 (defcfun* "LLVMMoveBasicBlockAfter" :void
@@ -305,6 +335,7 @@
 (defcfun (last-instruction "LLVMGetLastInstruction") value (bb basic-block))
 (defcfun (next-instruction "LLVMGetNextInstruction") value (inst value))
 (defcfun (previous-instruction "LLVMGetPreviousInstruction") value (inst value))
+(defcfun (clone-instruction "LLVMInstructionClone") value (inst value))
 
 (defcfun* "LLVMSetInstructionCallConv" :void
   (instr value) (cc calling-convention))

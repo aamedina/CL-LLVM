@@ -38,6 +38,8 @@
                          (:file "memory-buffers"
                                 :depends-on ("grovel" "error-handling"))
                          (:file "pass-managers"
+                                :depends-on ("grovel" "error-handling"))
+                         (:file "pass-registry"
                                 :depends-on ("grovel" "error-handling"))))
    (:module "" :pathname ""
             :depends-on ("package" "cffi" "core")

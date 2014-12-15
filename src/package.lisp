@@ -225,4 +225,30 @@
            :add-simplify-lib-calls-pass
            :add-tail-call-elimination-pass
            :add-constant-propagation-pass
-           :add-demote-memory-to-register-pass))
+           :add-demote-memory-to-register-pass
+           :initialize-core
+           :initialize-transform-utils
+           :initialize-scalar-opts
+           :initialize-vectorization
+           :initialize-inst-combine
+           :initialize-ipo
+           :initialize-instrumentation
+           :initialize-analysis
+           :initialize-ipa
+           :initialize-codegen
+           :initialize-target
+           :initialize-system
+           :basic-block-terminator
+           :const-nsw-neg
+           :const-nuw-neg
+           :const-nuw-add
+           :const-nsw-sub
+           :const-nuw-sub
+           :const-nsw-mul
+           :const-nuw-mul
+           :print-module
+           :print-value
+           :first-use
+           :next-use
+           :user
+           :used-value))
