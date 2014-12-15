@@ -93,6 +93,7 @@
   (:non-lazy-bind #.(cl:ash 1 31)))
 
 (defctype target-data :pointer)
+(defctype target-machine :pointer)
 (defctype target-library-info :pointer)
 (defctype struct-layout :pointer)
 (defctype generic-value :pointer)

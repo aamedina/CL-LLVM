@@ -191,7 +191,9 @@
            :add-module
            :remove-module
            :find-function
+           :recompile-function
            :execution-engine-target-data
+           :execution-engine-target-machine
            :add-global-mapping
            :pointer-to-global
            :link-in-mcjit
@@ -251,4 +253,14 @@
            :first-use
            :next-use
            :user
-           :used-value))
+           :used-value
+           :clone-instruction
+           :instruction-opcode
+           :icmp-pred
+           :fcmp-pred
+           :erase-from-parent
+           :succ
+           :num-succs
+           :conditionalp
+           :br-condition
+           :default-switch-dest))

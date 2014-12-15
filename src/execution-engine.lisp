@@ -97,6 +97,9 @@
       (error 'llvm-error :message out-error)
       (mem-ref out-mod 'module))))
 
+(defcfun (recompile-function "LLVMRecompileAndRelinkFunction") :pointer
+  (ee execution-engine)
+  (fn value))
 (defcfun (%find-function "LLVMFindFunction") :boolean
   (ee execution-engine) (name :string) (out-fn (:pointer value)))
 (defun find-function (ee name)
@@ -105,6 +108,9 @@
       (mem-ref out-fn 'value))))
 
 (defcfun (target-data "LLVMGetExecutionEngineTargetData") target-data
+  (ee execution-engine))
+
+(defcfun (target-machine "LLVMGetExecutionEngineTargetMachine") target-machine
   (ee execution-engine))
 
 (defcfun* "LLVMAddGlobalMapping" :void

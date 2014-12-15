@@ -6,6 +6,12 @@
 (defcfun (context "LLVMGetTypeContext") context
   (ty llvm-type))
 
+(defcfun (dump-type "LLVMDumpType") :void
+  (ty llvm-type))
+
+(defcfun (print-type "LLVMPrintTypeToString") :string
+  (ty llvm-type))
+
 (defcfun* "LLVMInt1TypeInContext" llvm-type (c context))
 (defun int1-type (&key (context (global-context)))
   (int1-type-in-context context))
@@ -77,6 +83,7 @@
       (pointer llvm-type (count-struct-element-types struct-ty))
     (get-struct-element-types struct-ty pointer)))
 (defcfun (packed-struct-p "LLVMIsPackedStruct") :boolean (struct-ty llvm-type))
+(defcfun (opaque-struct-p "LLVMIsOpaqueStruct") :boolean (struct-ty llvm-type))
 (defcfun* "LLVMStructCreateNamed" llvm-type
   (c context)
   (name :string))

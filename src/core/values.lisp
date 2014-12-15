@@ -336,6 +336,13 @@
 (defcfun (next-instruction "LLVMGetNextInstruction") value (inst value))
 (defcfun (previous-instruction "LLVMGetPreviousInstruction") value (inst value))
 (defcfun (clone-instruction "LLVMInstructionClone") value (inst value))
+(defcfun (instruction-opcode "LLVMGetInstructionOpcode") opcode (inst value))
+(defcfun (erase-from-parent "LLVMInstructionEraseFromParent") :void
+  (inst value))
+(defcfun (icmp-pred "LLVMGetICmpPredicate") int-predicate
+  (inst value))
+(defcfun (fcmp-pred "LLVMGetFCmpPredicate") real-predicate
+  (inst value))
 
 (defcfun* "LLVMSetInstructionCallConv" :void
   (instr value) (cc calling-convention))
@@ -365,6 +372,39 @@
   (set-tail-call call-inst is-tail-call)
   is-tail-call)
 
+(defcfun (num-succs "LLVMGetNumSuccessors") :unsigned-int
+  (term value))
+
+(defcfun (succ "LLVMGetSuccessor") basic-block
+  (term value)
+  (i :unsigned-int))
+
+(defcfun (set-succ "LLVMSetSuccessor") :void
+  (term value)
+  (i :unsigned-int)
+  (block basic-block))
+
+(defun (setf succ) (term i block)
+  (set-succ term i block)
+  term)
+
+(defcfun (conditionalp "LLVMIsConditional") :boolean
+  (branch value))
+
+(defcfun (br-condition "LLVMGetCondition") value
+  (branch value))
+
+(defcfun (set-condition "LLVMSetCondition") :void
+  (branch value)
+  (cond value))
+
+(defun (setf br-condition) (branch cond)
+  (set-condition branch cond)
+  branch)
+
+(defcfun (default-switch-dest "LLVMSetCondition") basic-block
+  (switch-inst value))
+
 (defcfun (%add-incoming "LLVMAddIncoming") :void
   (phi-node value)
   (incoming-values (carray value)) (incoming-blocks (carray basic-block))
@@ -375,5 +415,5 @@
 (defcfun* "LLVMCountIncoming" :unsigned-int (phi-node value))
 (defcfun (incoming-value "LLVMGetIncomingValue") value
   (phi-node value) (index :unsigned-int))
-(defcfun (incoming-basic-block "LLVMGetIncomingBasicBlock") basic-block
+(defcfun (incoming-block "LLVMGetIncomingBlock") basic-block
   (phi-node value) (index :unsigned-int))
